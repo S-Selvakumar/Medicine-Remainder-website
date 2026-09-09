@@ -179,12 +179,10 @@ Dose Tracking
 <p>
   No backend server is required for basic functionality.
 </p>
-
 <hr>
-<div align="center">
-
-### ⭐ Keep Learning • Keep Building • Keep Growing
-
+<div align = "center">
+© 2026 MediRemind  ·  Crafted with ❤️ by Team MediRemind
+</div>
 </div>
 
 
