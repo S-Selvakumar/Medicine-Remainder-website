@@ -1,0 +1,1398 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>MediRemind</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💊</text></svg>">
+<meta name="description" content="MediRemind - A simple, browser-based medicine reminder app created during my first semester of B.Tech as my first hackathon project. Preserved for GitHub Pages.">
+<meta name="theme-color" content="#215ecb">
+<style>
+/* ===================================================================
+   MediRemind — design tokens ported 1:1 from the original Replit
+   prototype's index.css / tailwind.config.ts. Do not "improve" these.
+=================================================================== */
+:root {
+  --button-outline: rgba(0,0,0,.10);
+  --badge-outline: rgba(0,0,0,.05);
+  --opaque-button-border-intensity: -8;
+  --elevate-1: rgba(0,0,0,.03);
+  --elevate-2: rgba(0,0,0,.08);
+
+  --background: 0 0% 98%;
+  --foreground: 220 15% 15%;
+  --border: 220 10% 88%;
+  --card: 0 0% 100%;
+  --card-foreground: 220 15% 15%;
+  --card-border: 220 8% 92%;
+  --popover: 220 8% 94%;
+  --popover-foreground: 220 15% 15%;
+  --primary: 220 70% 45%;
+  --primary-foreground: 220 70% 98%;
+  --secondary: 220 10% 90%;
+  --secondary-foreground: 220 15% 15%;
+  --muted: 220 12% 92%;
+  --muted-foreground: 220 10% 45%;
+  --accent: 220 15% 90%;
+  --accent-foreground: 220 15% 15%;
+  --destructive: 15 80% 55%;
+  --destructive-foreground: 15 80% 98%;
+  --input: 220 15% 75%;
+  --ring: 220 70% 45%;
+  --chart-2: 145 60% 35%;
+
+  --font-sans: Inter, -apple-system, BlinkMacSystemFont, sans-serif;
+  --radius-lg: .5625rem;
+  --radius-md: .375rem;
+  --radius-sm: .1875rem;
+
+  --shadow-xs: 0px 1px 3px 0px hsl(220 15% 15% / 0.08);
+  --shadow-sm: 0px 2px 4px -1px hsl(220 15% 15% / 0.06), 0px 1px 2px -1px hsl(220 15% 15% / 0.04);
+  --shadow-md: 0px 6px 12px -2px hsl(220 15% 15% / 0.10), 0px 3px 6px -3px hsl(220 15% 15% / 0.08);
+  --shadow-lg: 0px 10px 20px -4px hsl(220 15% 15% / 0.12), 0px 4px 8px -4px hsl(220 15% 15% / 0.08);
+}
+
+.dark {
+  --button-outline: rgba(255,255,255,.10);
+  --badge-outline: rgba(255,255,255,.05);
+  --elevate-1: rgba(255,255,255,.04);
+  --elevate-2: rgba(255,255,255,.09);
+
+  --background: 220 15% 10%;
+  --foreground: 220 10% 95%;
+  --border: 220 12% 20%;
+  --card: 220 12% 14%;
+  --card-foreground: 220 10% 95%;
+  --card-border: 220 12% 18%;
+  --popover: 220 12% 16%;
+  --popover-foreground: 220 10% 95%;
+  --primary: 220 70% 55%;
+  --primary-foreground: 220 15% 10%;
+  --secondary: 220 12% 20%;
+  --secondary-foreground: 220 10% 95%;
+  --muted: 220 15% 18%;
+  --muted-foreground: 220 8% 65%;
+  --accent: 220 18% 20%;
+  --accent-foreground: 220 10% 95%;
+  --destructive: 15 75% 50%;
+  --destructive-foreground: 220 10% 95%;
+  --input: 220 12% 35%;
+  --ring: 220 75% 65%;
+  --chart-2: 145 60% 65%;
+}
+
+* { box-sizing: border-box; }
+html, body {
+  margin: 0; padding: 0;
+  font-family: var(--font-sans);
+  background: hsl(var(--background));
+  color: hsl(var(--foreground));
+  -webkit-font-smoothing: antialiased;
+}
+h1,h2,h3,p { margin: 0; }
+button { font-family: inherit; cursor: pointer; }
+input, textarea, select { font-family: inherit; }
+
+.hidden { display: none !important; }
+
+.max-w-4xl { max-width: 56rem; margin-left: auto; margin-right: auto; }
+.px-4 { padding-left: 1rem; padding-right: 1rem; }
+.py-4 { padding-top: 1rem; padding-bottom: 1rem; }
+.py-6 { padding-top: 1.5rem; padding-bottom: 1.5rem; }
+
+/* Header */
+.app-header {
+  position: sticky; top: 0; z-index: 40;
+  background: hsl(var(--background));
+  border-bottom: 1px solid hsl(var(--border));
+}
+.header-row {
+  display: flex; align-items: center; justify-content: space-between;
+}
+.title-xl { font-size: 1.5rem; font-weight: 700; }
+.subtitle { font-size: .875rem; color: hsl(var(--muted-foreground)); margin-top: 2px;}
+.header-actions { display: flex; align-items: center; gap: .5rem; }
+
+.page { min-height: 100vh; padding-bottom: calc(5rem + env(safe-area-inset-bottom, 0px)); }
+
+/* Buttons */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  gap: .5rem;
+  border-radius: var(--radius-md);
+  font-size: .875rem; font-weight: 500;
+  padding: .5rem 1rem;
+  height: 2.5rem;
+  border: 1px solid transparent;
+  background: hsl(var(--secondary));
+  color: hsl(var(--secondary-foreground));
+  transition: filter .1s ease;
+  white-space: nowrap;
+}
+.btn:hover { position: relative; }
+.btn:hover::after {
+  content: ""; position: absolute; inset: 0; border-radius: inherit;
+  background: var(--elevate-1); pointer-events: none;
+}
+.btn { position: relative; }
+.btn-primary { background: hsl(var(--primary)); color: hsl(var(--primary-foreground)); }
+.btn-outline { background: transparent; border-color: hsl(var(--border)); color: hsl(var(--foreground)); }
+.btn-ghost { background: transparent; }
+.btn-destructive-outline { background: transparent; border-color: hsl(var(--destructive)); color: hsl(var(--destructive)); }
+.btn-icon { width: 2.5rem; height: 2.5rem; padding: 0; }
+.btn-icon.sm { width: 2.25rem; height: 2.25rem; }
+.btn-sm { height: 2.25rem; padding: .375rem .75rem; font-size: .8125rem; }
+.btn-lg { height: 2.75rem; padding: .625rem 1.5rem; font-size: 1rem; }
+.btn-full { width: 100%; }
+.btn-flex1 { flex: 1; }
+.btn[disabled] { opacity: .5; cursor: not-allowed; }
+
+/* Icon */
+.icon { width: 1.25rem; height: 1.25rem; flex-shrink: 0; }
+.icon-sm { width: 1rem; height: 1rem; }
+.icon-xs { width: .75rem; height: .75rem; }
+
+/* Card */
+.card {
+  background: hsl(var(--card));
+  color: hsl(var(--card-foreground));
+  border: 1px solid hsl(var(--card-border));
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xs);
+}
+.card-p4 { padding: 1rem; }
+.card-p6 { padding: 1.5rem; }
+.border-l-4 { border-left-width: 4px; border-left-style: solid; }
+.border-l-primary { border-left-color: hsl(var(--primary)); }
+.border-l-destructive { border-left-color: hsl(var(--destructive)); }
+.border-l-taken { border-left-color: hsl(var(--chart-2)); }
+
+/* Badge */
+.badge {
+  display: inline-flex; align-items: center; gap: .25rem;
+  border-radius: 9999px;
+  font-size: .75rem; font-weight: 500;
+  padding: .125rem .625rem;
+  border: 1px solid var(--badge-outline);
+  background: hsl(var(--secondary));
+  color: hsl(var(--secondary-foreground));
+  line-height: 1.4;
+}
+.badge-default { background: hsl(var(--primary)); color: hsl(var(--primary-foreground)); }
+.badge-destructive { background: hsl(var(--destructive)); color: hsl(var(--destructive-foreground)); }
+.badge-outline { background: transparent; border-color: hsl(var(--border)); color: hsl(var(--foreground)); }
+
+/* Forms */
+.field { margin-bottom: 1.25rem; }
+.label { display: block; font-size: .875rem; font-weight: 500; margin-bottom: .375rem; }
+.input, .textarea, .select {
+  width: 100%;
+  border: 1px solid hsl(var(--input));
+  border-radius: var(--radius-md);
+  background: hsl(var(--background));
+  color: hsl(var(--foreground));
+  padding: .5rem .75rem;
+  font-size: .875rem;
+  height: 2.5rem;
+}
+.textarea { height: auto; min-height: 4.5rem; resize: vertical; }
+.help-text { font-size: .8125rem; color: hsl(var(--muted-foreground)); margin-top: .25rem; }
+.error-text { font-size: .8125rem; color: hsl(var(--destructive)); margin-top: .25rem; }
+.form-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+.form-actions { display: flex; gap: .75rem; margin-top: .5rem; }
+.time-row { display: flex; gap: .5rem; }
+.chips { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: .75rem; }
+.chip-remove { background: none; border: none; padding: 0; margin-left: .25rem; display: inline-flex; color: inherit; }
+
+/* Switch */
+.switch {
+  position: relative; width: 2.5rem; height: 1.4rem;
+  border-radius: 9999px; background: hsl(var(--secondary));
+  border: 1px solid hsl(var(--border)); flex-shrink: 0;
+  cursor: pointer; transition: background .15s ease;
+}
+.switch[data-on="true"] { background: hsl(var(--primary)); border-color: hsl(var(--primary)); }
+.switch .knob {
+  position: absolute; top: 1px; left: 1px;
+  width: 1.1rem; height: 1.1rem; border-radius: 9999px;
+  background: white; transition: transform .15s ease;
+  box-shadow: var(--shadow-xs);
+}
+.switch[data-on="true"] .knob { transform: translateX(1.1rem); }
+.switch-row { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+
+/* Bottom nav */
+.bottom-nav {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 50;
+  background: hsl(var(--card));
+  border-top: 1px solid hsl(var(--border));
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+.bottom-nav-inner {
+  display: flex; align-items: center; justify-content: space-around;
+  height: 4rem; max-width: 56rem; margin: 0 auto; padding: 0 1rem;
+}
+.nav-btn {
+  display: flex; flex-direction: column; align-items: center; gap: .125rem;
+  background: none; border: none; color: hsl(var(--muted-foreground));
+  padding: .5rem .75rem; border-radius: var(--radius-md);
+}
+.nav-btn.active { color: hsl(var(--primary)); }
+.nav-btn span { font-size: .6875rem; }
+
+/* Dialog */
+.overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 60;
+  display: flex; align-items: center; justify-content: center; padding: 1rem;
+}
+.dialog {
+  background: hsl(var(--card)); color: hsl(var(--card-foreground));
+  border-radius: var(--radius-lg); box-shadow: var(--shadow-lg);
+  width: 100%; max-width: 42rem; max-height: 90vh; overflow-y: auto;
+  padding: 1.5rem;
+}
+.dialog-title { font-size: 1.125rem; font-weight: 600; margin-bottom: 1.25rem; }
+
+/* Empty state */
+.empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 4rem 1rem; text-align: center; }
+.empty-icon-wrap { width: 12rem; height: 12rem; margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: center; }
+.empty-icon { width: 6rem; height: 6rem; color: hsl(var(--primary)); opacity: .3; }
+.empty-title { font-size: 1.5rem; font-weight: 600; margin-bottom: .5rem; }
+.empty-desc { color: hsl(var(--muted-foreground)); max-width: 28rem; margin-bottom: 1.5rem; }
+
+/* Toast */
+.toast-container { position: fixed; top: 1rem; right: 1rem; z-index: 70; display: flex; flex-direction: column; gap: .5rem; max-width: 24rem; }
+.toast-card { border-left: 4px solid hsl(var(--primary)); box-shadow: var(--shadow-lg); }
+
+/* Schedule timeline */
+.timeline-item { display: flex; gap: 1rem; align-items: flex-start; }
+.timeline-marker { display: flex; flex-direction: column; align-items: center; flex-shrink: 0; align-self: stretch; }
+.timeline-line { width: 2px; flex: 1; min-height: 1.25rem; background: hsl(var(--border)); margin-top: .375rem; margin-bottom: .375rem; }
+.timeline-content {
+  flex: 1;
+  padding: 0.875rem 1rem;
+  border-radius: var(--radius-lg);
+  border: 1px solid hsl(var(--card-border));
+  background: hsl(var(--background) / 0.5);
+  margin-bottom: 0.75rem;
+  transition: background .15s ease, border-color .15s ease;
+}
+.opacity-60 { opacity: .6; }
+/* Past-item states: keep the schedule readable even once several doses
+   have passed — taken items get subtle dimming, missed items get a clean red card tint. */
+.timeline-item.is-taken .timeline-marker .badge { opacity: .55; }
+.timeline-item.is-taken .timeline-content { opacity: .8; background: hsl(var(--secondary) / 0.2); }
+.timeline-item.is-missed .timeline-content {
+  background: hsl(var(--destructive) / 0.08);
+  border-color: hsl(var(--destructive) / 0.3);
+}
+.timeline-item.is-missed .timeline-marker .badge:not(.badge-default) {
+  border-color: hsl(var(--destructive) / 0.4);
+  color: hsl(var(--destructive));
+}
+.badge-missed {
+  background: hsl(var(--destructive) / 0.15);
+  color: hsl(var(--destructive));
+  border-color: hsl(var(--destructive) / 0.3);
+}
+.timeline-missed-tag { color: hsl(var(--destructive)); }
+
+/* Clock icon — tinted to match the app's blue theme instead of inheriting
+   plain foreground/black text color. */
+.icon-clock { color: hsl(var(--primary)); }
+
+/* Utility flex/spacing used across components */
+.flex { display: flex; }
+.items-center { align-items: center; }
+.items-start { align-items: flex-start; }
+.justify-between { justify-content: space-between; }
+.gap-1 { gap: .25rem; } .gap-2 { gap: .5rem; } .gap-3 { gap: .75rem; } .gap-4 { gap: 1rem; }
+.flex-1 { flex: 1 1 0%; }
+.flex-col { flex-direction: column; }
+.flex-wrap { flex-wrap: wrap; }
+.mt-1 {margin-top:.25rem;} .mt-2 {margin-top:.5rem;} .mt-3 {margin-top:.75rem;} .mt-4{margin-top:1rem;} .mb-1{margin-bottom:.25rem;} .mb-2{margin-bottom:.5rem;} .mb-3{margin-bottom:.75rem;} .mb-4{margin-bottom:1rem;} .mb-6{margin-bottom:1.5rem;}
+.text-lg { font-size: 1.125rem; }
+.text-xl { font-size: 1.25rem; }
+.text-2xl { font-size: 1.5rem; }
+.font-semibold { font-weight: 600; }
+.font-bold { font-weight: 700; }
+.font-medium { font-weight: 500; }
+.text-sm { font-size: .875rem; }
+.text-muted { color: hsl(var(--muted-foreground)); }
+.text-primary { color: hsl(var(--primary)); }
+.space-y-4 > * + * { margin-top: 1rem; }
+.space-y-6 > * + * { margin-top: 1.5rem; }
+.space-y-1 > * + * { margin-top: .25rem; }
+
+@media (max-width: 640px) {
+  .form-row-2 { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<div id="root"></div>
+
+<div id="toast-container" class="toast-container"></div>
+
+<script>
+/* ===================================================================
+   MediRemind — preserved prototype logic.
+   Original stack: React + TypeScript + Express + in-memory storage.
+   This is a faithful, browser-only re-implementation of the same
+   screens, same mock data, and same behavior (no backend, no build).
+   Data is intentionally NOT persisted across reloads for medicines /
+   family members, exactly like the original in-memory React state —
+   only the theme preference persists, exactly as the original did.
+=================================================================== */
+
+// ---------- Icon set (inline SVG, mirrors lucide-react icons used) ----------
+const ICONS = {
+  home: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>',
+  plus: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>',
+  calendar: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M16 2v4"/><path d="M8 2v4"/><path d="M3 10h18"/></svg>',
+  users: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>',
+  settings: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>',
+  moon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>',
+  sun: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>',
+  pill: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m10.5 20.5 10-10a4.95 4.95 0 1 0-7-7l-10 10a4.95 4.95 0 1 0 7 7Z"/><path d="m8.5 8.5 7 7"/></svg>',
+  clock: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5.25l3.5 2.1"/><circle cx="12" cy="12" r=".9" fill="currentColor" stroke="none"/></svg>',
+  edit: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>',
+  trash: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>',
+  check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>',
+  alertTriangle: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.46 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>',
+  package: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16.5 9.4 7.55 4.24"/><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="M3.29 7 12 12l8.71-5"/><path d="M12 22V12"/></svg>',
+  x: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>',
+  mail: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>',
+  phone: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13.83 21.06a2.6 2.6 0 0 1-3-.44l-1.9-1.9A2 2 0 0 1 8.5 17V13a2 2 0 0 0-2-2H2.9a2.6 2.6 0 0 1-.44-3l1.9-1.9a2 2 0 0 1 1.72-.44"/></svg>',
+  user: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>',
+  pillBottle: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8V6a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/><path d="M6 8h12l1 12a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2Z"/><path d="M6 14h12"/></svg>',
+  bell: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.27 21a1.998 1.998 0 0 0 3.46 0"/><path d="M3.34 18a1 1 0 0 0 .87 1.5h15.58a1 1 0 0 0 .87-1.5A17 17 0 0 1 18 8a6 6 0 0 0-12 0 17 17 0 0 1-2.66 10Z"/></svg>',
+  volume2: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>',
+  send: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.976 3.191a2 2 0 0 1 1.115 1.115z"/></svg>',
+};
+function icon(name, cls) { return `<span class="${cls||'icon'}" style="display:inline-flex">${ICONS[name]}</span>`; }
+
+// ---------- Time formatting ----------
+function formatTime12(time24) {
+  if (!time24 || typeof time24 !== 'string' || !time24.includes(':')) return time24 || '';
+  const [hStr, mStr] = time24.split(':');
+  let h = Number(hStr);
+  const m = Number(mStr);
+  if (Number.isNaN(h) || Number.isNaN(m)) return time24;
+  const period = h >= 12 ? 'PM' : 'AM';
+  h = h % 12;
+  if (h === 0) h = 12;
+  return `${h}:${String(m).padStart(2, '0')} ${period}`;
+}
+
+// ---------- Notification Manager ----------
+const NotificationManager = {
+  permission: 'default',
+  timers: new Map(),
+  init() {
+    if ('Notification' in window) this.permission = Notification.permission;
+  },
+  async requestPermission() {
+    if ('Notification' in window) {
+      const p = await Notification.requestPermission();
+      this.permission = p;
+      return p === 'granted';
+    }
+    return false;
+  },
+  scheduleReminder(reminder) {
+    if (!reminder.enableNotifications) return;
+    const scheduleNext = () => {
+      const [h, m] = reminder.time.split(':').map(Number);
+      const now = new Date();
+      const scheduled = new Date();
+      scheduled.setHours(h, m, 0, 0);
+      if (scheduled < now) scheduled.setDate(scheduled.getDate() + 1);
+
+      let rescheduled = false;
+      const rescheduleOnce = () => { if (!rescheduled) { rescheduled = true; scheduleNext(); } };
+
+      const reminderTime = new Date(scheduled.getTime() - 15 * 60000);
+      const wait = reminderTime.getTime() - now.getTime();
+      if (wait > 0) {
+        const id = window.setTimeout(() => { this.showNotification(reminder); rescheduleOnce(); }, wait);
+        this.timers.set(`${reminder.id}-${reminder.time}`, id);
+      }
+      if (reminder.enableVoiceReminder) {
+        const voiceTime = new Date(scheduled.getTime() - 10 * 60000);
+        const vwait = voiceTime.getTime() - now.getTime();
+        if (vwait > 0) {
+          const vid = window.setTimeout(() => { this.speakReminder(reminder); rescheduleOnce(); }, vwait);
+          this.timers.set(`${reminder.id}-${reminder.time}-voice`, vid);
+        }
+      }
+    };
+    scheduleNext();
+  },
+  showNotification(reminder) {
+    playBeep();
+    if (this.permission === 'granted') {
+      new Notification(`Time for ${reminder.medicineName}`, {
+        body: `${reminder.dosage} - Scheduled for ${formatTime12(reminder.time)}`,
+        tag: reminder.id,
+        requireInteraction: true,
+      });
+    } else {
+      showToast(`Time for ${reminder.medicineName}`, `${reminder.dosage} - Scheduled for ${formatTime12(reminder.time)}`);
+    }
+  },
+  speakReminder(reminder) {
+    if ('speechSynthesis' in window) {
+      const u = new SpeechSynthesisUtterance(`It's time to take your medicine. ${reminder.medicineName}, ${reminder.dosage}`);
+      u.rate = 0.9; u.pitch = 1; u.volume = 1;
+      window.speechSynthesis.speak(u);
+    }
+  },
+  cancelAll() {
+    this.timers.forEach(id => clearTimeout(id));
+    this.timers.clear();
+  }
+};
+
+let sharedAudioCtx = null;
+function unlockAudio() {
+  if (!sharedAudioCtx) {
+    try { sharedAudioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
+    catch (e) { console.warn('AudioContext unavailable:', e); return; }
+  }
+  if (sharedAudioCtx.state === 'suspended') sharedAudioCtx.resume().catch(() => {});
+}
+document.addEventListener('click', unlockAudio, { once: false });
+
+function playBeep() {
+  try {
+    if (!sharedAudioCtx) { unlockAudio(); }
+    if (!sharedAudioCtx) return;
+    if (sharedAudioCtx.state === 'suspended') sharedAudioCtx.resume().catch(() => {});
+    const ctx = sharedAudioCtx;
+    [880, 660].forEach((freq, i) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.value = freq;
+      const start = ctx.currentTime + i * 0.18;
+      gain.gain.setValueAtTime(0.0001, start);
+      gain.gain.exponentialRampToValueAtTime(0.2, start + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.0001, start + 0.16);
+      osc.connect(gain).connect(ctx.destination);
+      osc.start(start);
+      osc.stop(start + 0.18);
+    });
+  } catch (e) { console.warn('Could not play reminder sound:', e); }
+}
+
+// ---------- Email Manager ----------
+const EmailManager = {
+  async sendEmail({ to, subject, body }) {
+    console.log('Email send request:', { to, subject, body });
+    const normalizedBody = (body || '').replace(/\r\n|\n/g, '\r\n');
+    const encTo = encodeURIComponent(to || '');
+    const encSubject = encodeURIComponent(subject || '');
+    const encBody = encodeURIComponent(normalizedBody);
+    window.location.href = `mailto:${encTo}?subject=${encSubject}&body=${encBody}`;
+    return true;
+  }
+};
+
+function generateDailySummaryEmail() {
+  const todayStr = new Date().toLocaleDateString(undefined, {
+    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+  });
+  
+  const now = new Date();
+  const isPast = (timeStr) => {
+    const [h, m] = timeStr.split(':').map(Number);
+    const scheduled = new Date(); scheduled.setHours(h, m, 0, 0);
+    return now > scheduled;
+  };
+
+  const items = state.medicines.flatMap(med =>
+    med.times.map(time => {
+      const taken = !!med.takenTimes[time];
+      const past = isPast(time);
+      let statusStr = '';
+      if (taken) statusStr = '✅ Taken';
+      else if (past) statusStr = '⚠️ Missed (Not taken yet)';
+      else statusStr = '⏳ Scheduled for later';
+
+      return { med, time, statusStr, taken, past };
+    })
+  ).sort((a, b) => a.time.localeCompare(b.time));
+
+  let body = `📋 MediRemind — Daily Medication Summary\r\n`;
+  body += `Date: ${todayStr}\r\n\r\n`;
+  body += `--------------------------------------------------\r\n`;
+  body += `TODAY'S MEDICATION SCHEDULE\r\n`;
+  body += `--------------------------------------------------\r\n\r\n`;
+
+  if (items.length === 0) {
+    body += `No medicines scheduled for today.\r\n\r\n`;
+  } else {
+    items.forEach((item) => {
+      body += `[${formatTime12(item.time)}]  ${item.med.name}\r\n`;
+      body += `           Dosage: ${item.med.dosage}\r\n`;
+      body += `           Status: ${item.statusStr}\r\n`;
+      if (item.med.notes) {
+        body += `           Notes: ${item.med.notes}\r\n`;
+      }
+      if ((item.med.stockCount || 0) <= (item.med.lowStockThreshold || 5)) {
+        body += `           ⚠️ Low Stock: ${item.med.stockCount ?? 0} remaining\r\n`;
+      }
+      body += `\r\n`;
+    });
+  }
+
+  const totalCount = items.length;
+  const takenCount = items.filter(i => i.taken).length;
+  const missedCount = items.filter(i => i.past && !i.taken).length;
+  const pendingCount = items.filter(i => !i.past && !i.taken).length;
+
+  body += `--------------------------------------------------\r\n`;
+  body += `SUMMARY & INVENTORY STATUS\r\n`;
+  body += `--------------------------------------------------\r\n`;
+  body += `Total Scheduled Doses: ${totalCount}\r\n`;
+  body += `Taken: ${takenCount}\r\n`;
+  body += `Missed: ${missedCount}\r\n`;
+  body += `Pending: ${pendingCount}\r\n\r\n`;
+
+  const lowStockMeds = state.medicines.filter(m => (m.stockCount || 0) <= (m.lowStockThreshold || 5));
+  if (lowStockMeds.length > 0) {
+    body += `⚠️ LOW STOCK ALERTS:\r\n`;
+    lowStockMeds.forEach(m => {
+      body += `- ${m.name}: ${m.stockCount ?? 0} left in stock (Threshold: ${m.lowStockThreshold || 5})\r\n`;
+    });
+    body += `\r\n`;
+  }
+
+  body += `--------------------------------------------------\r\n`;
+  body += `Sent via MediRemind — Your Medicine Companion\r\n`;
+
+  return {
+    subject: `Daily Medicine Summary - ${todayStr}`,
+    body
+  };
+}
+
+// ---------- Toast ----------
+function showToast(title, description, variant) {
+  const container = document.getElementById('toast-container');
+  const el = document.createElement('div');
+  el.className = 'card toast-card card-p4';
+  if (variant === 'destructive') el.style.borderLeftColor = 'hsl(var(--destructive))';
+  el.innerHTML = `<div style="font-weight:600;font-size:.9rem;">${title}</div>${description ? `<div class="text-sm text-muted" style="margin-top:2px;">${description}</div>` : ''}`;
+  container.appendChild(el);
+  setTimeout(() => el.remove(), 4000);
+}
+
+// ---------- App State ----------
+const DEFAULT_MEDICINES = [
+  { id: '1', name: 'Metformin', dosage: '500mg - 1 tablet', quantityPerDose: 1, times: ['08:00', '20:00'], frequency: 'daily', notes: 'Take with meals to reduce stomach upset', stockCount: 42, lowStockThreshold: 10, enableNotifications: true, enableVoiceReminder: true, takenTimes: {} },
+  { id: '2', name: 'Atorvastatin', dosage: '20mg - 1 tablet', quantityPerDose: 1, times: ['21:00'], frequency: 'daily', notes: 'Take at bedtime', stockCount: 4, lowStockThreshold: 5, enableNotifications: true, enableVoiceReminder: true, takenTimes: {} },
+  { id: '3', name: 'Vitamin D3', dosage: '1000 IU - 1 capsule', quantityPerDose: 1, times: ['09:00'], frequency: 'daily', notes: undefined, stockCount: 28, lowStockThreshold: 8, enableNotifications: true, enableVoiceReminder: true, takenTimes: {} },
+];
+const DEFAULT_FAMILY = [
+  { id: '1', name: 'Jane Doe', email: 'jane@example.com', phone: '+1234567890', relation: 'Spouse', notifyOnMissed: true, notifyOnTaken: false },
+];
+
+const state = {
+  activeTab: 'home',
+  showAddMedicineDialog: false,
+  showAddFamilyDialog: false,
+  editingMedicineId: null,
+  medicines: DEFAULT_MEDICINES,
+  familyMembers: DEFAULT_FAMILY,
+  addMedicineTimes: [],
+  lastEmailSentAt: null,
+  lastUsageDate: null,
+};
+
+// ---------- Persistence ----------
+const STORAGE_KEY = 'medireminddata';
+function saveAppData() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({
+      medicines: state.medicines,
+      familyMembers: state.familyMembers,
+      lastEmailSentAt: state.lastEmailSentAt,
+      lastUsageDate: state.lastUsageDate,
+    }));
+  } catch (e) { console.warn('Could not save app data:', e); }
+}
+function loadAppData() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return;
+    const data = JSON.parse(raw);
+    if (Array.isArray(data.medicines)) state.medicines = data.medicines;
+    if (Array.isArray(data.familyMembers)) state.familyMembers = data.familyMembers;
+    if (data.lastEmailSentAt) state.lastEmailSentAt = data.lastEmailSentAt;
+    if (data.lastUsageDate) state.lastUsageDate = data.lastUsageDate;
+  } catch (e) { console.warn('Could not load app data:', e); }
+}
+
+// ---------- Daily Reset ----------
+function todayDateString() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+function checkDailyReset() {
+  const today = todayDateString();
+  if (state.lastUsageDate && state.lastUsageDate !== today) {
+    state.medicines.forEach(med => { med.takenTimes = {}; });
+    console.log('Daily reset performed — intake status cleared for', today);
+  }
+  state.lastUsageDate = today;
+}
+
+function render() {
+  const root = document.getElementById('root');
+  let html = '';
+  if (state.activeTab === 'home') html = renderHome();
+  else if (state.activeTab === 'add') html = renderAddPage();
+  else if (state.activeTab === 'schedule') html = renderSchedule();
+  else if (state.activeTab === 'family') html = renderFamily();
+  else if (state.activeTab === 'settings') html = renderSettings();
+
+  html += renderBottomNav();
+  if (state.showAddMedicineDialog) html += renderAddMedicineDialog();
+  if (state.showAddFamilyDialog) html += renderAddFamilyDialog();
+
+  root.innerHTML = html;
+  attachHandlers();
+  rescheduleReminders();
+  saveAppData();
+}
+
+// ---------- Theme Toggle ----------
+function themeToggleHTML(idSuffix) {
+  const theme = document.documentElement.classList.contains('dark') ? 'dark' : 'light';
+  return `<button class="btn btn-ghost btn-icon" id="theme-toggle-${idSuffix}" data-testid="button-theme-toggle">${theme === 'light' ? icon('moon') : icon('sun')}</button>`;
+}
+function initTheme() {
+  const saved = localStorage.getItem('theme');
+  const initial = saved || 'light';
+  document.documentElement.classList.toggle('dark', initial === 'dark');
+}
+function toggleTheme() {
+  const isDark = document.documentElement.classList.contains('dark');
+  const next = isDark ? 'light' : 'dark';
+  document.documentElement.classList.toggle('dark', next === 'dark');
+  localStorage.setItem('theme', next);
+  render();
+}
+
+// ---------- Home ----------
+function renderHome() {
+  const meds = state.medicines;
+  return `
+  <div class="page">
+    <header class="app-header">
+      <div class="max-w-4xl px-4 py-4 header-row">
+        <div>
+          <h1 class="title-xl" data-testid="text-app-title">MediRemind</h1>
+          <p class="subtitle" data-testid="text-app-subtitle">Your medicine companion</p>
+        </div>
+        <div class="header-actions">
+          ${themeToggleHTML('home')}
+          <button class="btn btn-primary" id="btn-add-medicine-header" data-testid="button-add-medicine-header">${icon('plus')} Add Medicine</button>
+        </div>
+      </div>
+    </header>
+    <main class="max-w-4xl px-4 py-6">
+      ${meds.length === 0 ? renderEmptyState() : `
+        <div class="space-y-4">
+          <h2 class="text-xl font-semibold" data-testid="text-medicines-title">Your Medicines</h2>
+          ${meds.map(renderMedicineCard).join('')}
+        </div>
+      `}
+    </main>
+  </div>`;
+}
+
+function renderEmptyState() {
+  return `
+  <div class="empty-state" data-testid="empty-state">
+    <div class="empty-icon-wrap">${icon('pillBottle', 'empty-icon')}</div>
+    <h2 class="empty-title" data-testid="text-empty-title">No medicines added yet</h2>
+    <p class="empty-desc" data-testid="text-empty-description">Start by adding your first medicine to never miss a dose. You'll receive notifications and daily email reminders.</p>
+    <button class="btn btn-primary btn-lg" id="btn-add-first-medicine" data-testid="button-add-first-medicine">${icon('plus')} Add Your First Medicine</button>
+  </div>`;
+}
+
+function medStatusClass(med, time) {
+  if (med.takenTimes[time]) return 'border-l-taken';
+  const now = new Date();
+  const [h, m] = time.split(':').map(Number);
+  const scheduled = new Date(); scheduled.setHours(h, m, 0, 0);
+  if (now > scheduled) return 'border-l-destructive';
+  return 'border-l-primary';
+}
+
+function renderMedicineCard(med) {
+  const isLowStock = (med.stockCount || 0) <= (med.lowStockThreshold || 5);
+  const statusClass = medStatusClass(med, med.times[0]);
+  return `
+  <div class="card card-p4 border-l-4 ${statusClass}" data-testid="card-medicine-${med.id}">
+    <div class="flex items-start justify-between gap-4">
+      <div class="flex-1" style="min-width:0;">
+        <div class="flex items-center gap-2 mb-2">
+          <span class="icon text-primary">${ICONS.pill}</span>
+          <h3 class="font-semibold text-lg" data-testid="text-medicine-name-${med.id}">${escapeHtml(med.name)}</h3>
+        </div>
+        <p class="text-muted mb-3" style="font-size:1rem;" data-testid="text-dosage-${med.id}">${escapeHtml(med.dosage)}</p>
+        <div class="flex flex-wrap gap-2 mb-3">
+          ${med.times.map((t, i) => `<span class="badge ${med.takenTimes[t] ? 'badge-default' : ''}" data-testid="badge-time-${med.id}-${i}">${icon('clock', med.takenTimes[t] ? 'icon-xs' : 'icon-xs icon-clock')} ${formatTime12(t)}</span>`).join('')}
+        </div>
+        ${med.notes ? `<p class="text-sm text-muted" data-testid="text-notes-${med.id}">${escapeHtml(med.notes)}</p>` : ''}
+        <div class="flex items-center gap-2 mt-2">
+          <span class="icon-sm text-muted" style="display:inline-flex;color:hsl(var(--muted-foreground))">${ICONS.package}</span>
+          <span class="text-sm text-muted">Stock: ${med.stockCount ?? 0}</span>
+          ${isLowStock ? `<span class="badge badge-destructive" data-testid="badge-low-stock-${med.id}">${icon('alertTriangle','icon-xs')} Low Stock</span>` : ''}
+        </div>
+      </div>
+      <div class="flex flex-col gap-2">
+        <button class="btn btn-ghost btn-icon sm" data-action="edit-med" data-id="${med.id}" data-testid="button-edit-${med.id}">${icon('edit','icon-sm')}</button>
+        <button class="btn btn-ghost btn-icon sm" data-action="delete-med" data-id="${med.id}" data-testid="button-delete-${med.id}">${icon('trash','icon-sm')}</button>
+      </div>
+    </div>
+    <div class="flex gap-2 mt-4">
+      ${med.times.map((t, i) => `
+        <button class="btn ${med.takenTimes[t] ? 'btn-primary' : 'btn-outline'} btn-sm btn-flex1" data-action="mark-taken" data-id="${med.id}" data-time="${t}" data-testid="button-mark-taken-${med.id}-${i}">
+          ${med.takenTimes[t] ? icon('check','icon-sm') + ' Taken' : 'Mark Taken'}
+        </button>`).join('')}
+    </div>
+  </div>`;
+}
+
+function renderAddPage() {
+  return `
+  <div class="page">
+    <div class="max-w-4xl px-4 py-6">
+      <h1 class="text-2xl font-bold mb-6" data-testid="text-add-medicine-title">Add New Medicine</h1>
+      ${renderAddMedicineForm(false)}
+    </div>
+  </div>`;
+}
+
+// ---------- Add/Edit Medicine Form ----------
+function renderAddMedicineForm(inDialog) {
+  const editing = state.editingMedicineId ? state.medicines.find(m => m.id === state.editingMedicineId) : null;
+  const times = state.addMedicineTimes;
+  return `
+  <form id="add-medicine-form" data-in-dialog="${inDialog}">
+    <div class="field">
+      <label class="label" for="field-med-name">Medicine Name</label>
+      <input class="input" type="text" id="field-med-name" name="name" placeholder="e.g., Aspirin" value="${editing ? escapeHtml(editing.name) : ''}" data-testid="input-medicine-name" required>
+    </div>
+    <div class="field">
+      <label class="label" for="field-med-dosage">Dosage</label>
+      <input class="input" type="text" id="field-med-dosage" name="dosage" placeholder="e.g., 100mg - 1 tablet" value="${editing ? escapeHtml(editing.dosage) : ''}" data-testid="input-dosage" required>
+    </div>
+    <div class="field">
+      <label class="label" for="field-med-frequency">Frequency</label>
+      <select class="select" id="field-med-frequency" name="frequency" data-testid="select-frequency">
+        <option value="daily" ${!editing || editing.frequency === 'daily' ? 'selected' : ''}>Daily</option>
+        <option value="weekly" ${editing && editing.frequency === 'weekly' ? 'selected' : ''}>Weekly</option>
+        <option value="as-needed" ${editing && editing.frequency === 'as-needed' ? 'selected' : ''}>As Needed</option>
+      </select>
+    </div>
+    <div class="field">
+      <label class="label" for="time-input">Reminder Times</label>
+      <div class="time-row">
+        <input class="input" type="time" id="time-input" data-testid="input-time">
+        <button type="button" class="btn btn-outline btn-icon" id="btn-add-time" data-testid="button-add-time">${icon('plus','icon-sm')}</button>
+      </div>
+      <div class="chips" id="time-chips">
+        ${times.map(t => `<span class="badge" data-testid="badge-time-${t}">${formatTime12(t)}<button type="button" class="chip-remove" data-action="remove-time" data-time="${t}" data-testid="button-remove-time-${t}">${icon('x','icon-xs')}</button></span>`).join('')}
+      </div>
+      <p class="error-text hidden" id="times-error">At least one time is required</p>
+    </div>
+    <div class="field">
+      <label class="label" for="field-med-notes">Notes (Optional)</label>
+      <textarea class="textarea" id="field-med-notes" name="notes" placeholder="e.g., Take with food" data-testid="input-notes">${editing && editing.notes ? escapeHtml(editing.notes) : ''}</textarea>
+    </div>
+    <div class="form-row-2 field">
+      <div>
+        <label class="label" for="field-stock-count">Stock Count</label>
+        <input class="input" type="number" id="field-stock-count" name="stockCount" placeholder="0" value="${editing ? (editing.stockCount ?? 0) : 0}" data-testid="input-stock-count">
+      </div>
+      <div>
+        <label class="label" for="field-low-stock">Low Stock Alert</label>
+        <input class="input" type="number" id="field-low-stock" name="lowStockThreshold" placeholder="5" value="${editing ? (editing.lowStockThreshold ?? 5) : 5}" data-testid="input-low-stock-threshold">
+      </div>
+    </div>
+    <div class="field">
+      <label class="label" for="field-qty-per-dose">Quantity per Dose</label>
+      <input class="input" type="number" min="1" id="field-qty-per-dose" name="quantityPerDose" placeholder="1" value="${editing ? (editing.quantityPerDose ?? 1) : 1}" data-testid="input-quantity-per-dose">
+      <p class="help-text">How much stock is used up each time this is marked Taken</p>
+    </div>
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary btn-flex1" data-testid="button-submit">${editing ? 'Update Medicine' : 'Add Medicine'}</button>
+      <button type="button" class="btn btn-outline" data-action="cancel-add-medicine" data-testid="button-cancel">Cancel</button>
+    </div>
+  </form>`;
+}
+
+function renderAddMedicineDialog() {
+  const editing = state.editingMedicineId ? state.medicines.find(m => m.id === state.editingMedicineId) : null;
+  return `
+  <div class="overlay" id="add-medicine-overlay">
+    <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="add-medicine-dialog-title">
+      <h2 class="dialog-title" id="add-medicine-dialog-title">${editing ? 'Edit Medicine' : 'Add New Medicine'}</h2>
+      ${renderAddMedicineForm(true)}
+    </div>
+  </div>`;
+}
+
+// ---------- Schedule ----------
+function renderSchedule() {
+  const items = state.medicines.flatMap(med =>
+    med.times.map(time => ({
+      id: `${med.id}-${time}`,
+      medId: med.id,
+      medicineName: med.name,
+      dosage: med.dosage,
+      time,
+      taken: !!med.takenTimes[time],
+    }))
+  );
+  const sorted = [...items].sort((a, b) => a.time.localeCompare(b.time));
+  const now = new Date();
+  const isPast = (time) => {
+    const [h, m] = time.split(':').map(Number);
+    const scheduled = new Date(); scheduled.setHours(h, m, 0, 0);
+    return now > scheduled;
+  };
+
+  const timeline = sorted.map((item, index) => {
+    const isItemPast = isPast(item.time);
+    const isNext = !isItemPast && sorted.slice(0, index).every(i => isPast(i.time));
+    const isMissed = isItemPast && !item.taken;
+    const isTaken = !!item.taken;
+    const stateClass = isTaken ? 'is-taken' : (isMissed ? 'is-missed' : '');
+    const badgeClass = isNext ? 'badge-default' : (isTaken ? '' : '');
+    return `
+    <div class="timeline-item ${stateClass}" data-testid="schedule-item-${item.id}">
+      <div class="timeline-marker">
+        <span class="badge ${badgeClass}" style="width:5rem;justify-content:center;" data-testid="badge-time-${item.id}">${icon('clock', isNext ? 'icon-xs' : 'icon-xs icon-clock')} ${formatTime12(item.time)}</span>
+        ${index < sorted.length - 1 ? '<div class="timeline-line"></div>' : ''}
+      </div>
+      <div class="timeline-content">
+        <div class="flex items-center gap-2 mb-1">
+          <span class="icon-sm text-primary" style="display:inline-flex">${ICONS.pill}</span>
+          <h3 class="font-medium" data-testid="text-medicine-${item.id}">${escapeHtml(item.medicineName)}</h3>
+          ${isTaken ? `<span class="badge badge-default" data-testid="badge-taken-${item.id}">${icon('check','icon-xs')} Taken</span>` : ''}
+          ${isMissed ? `<span class="badge badge-missed" data-testid="badge-missed-${item.id}">${icon('alertTriangle','icon-xs')} Missed</span>` : ''}
+        </div>
+        <p class="text-sm text-muted mb-2" data-testid="text-dosage-${item.id}">${escapeHtml(item.dosage)}</p>
+        <button class="btn ${item.taken ? 'btn-primary' : 'btn-outline'} btn-sm" data-action="mark-taken" data-id="${item.medId}" data-time="${item.time}" data-testid="button-mark-taken-schedule-${item.id}">
+          ${item.taken ? icon('check','icon-sm') + ' Taken' : 'Mark Taken'}
+        </button>
+      </div>
+    </div>`;
+  }).join('');
+
+  const lastSentLabel = state.lastEmailSentAt
+    ? new Date(state.lastEmailSentAt).toLocaleString([], { hour: 'numeric', minute: '2-digit', hour12: true })
+    : 'Not sent yet';
+
+  return `
+  <div class="page">
+    <header class="app-header">
+      <div class="max-w-4xl px-4 py-4 header-row">
+        <div>
+          <h1 class="title-xl" data-testid="text-schedule-title">Schedule</h1>
+          <p class="subtitle" data-testid="text-schedule-subtitle">Today's medication timeline</p>
+        </div>
+        ${themeToggleHTML('schedule')}
+      </div>
+    </header>
+    <main class="max-w-4xl px-4 py-6 space-y-6">
+      <div class="card card-p6" data-testid="card-today-schedule">
+        <h2 class="text-2xl font-semibold mb-6">Today's Schedule</h2>
+        ${sorted.length === 0 ? `
+        <div class="empty-state" data-testid="empty-state-schedule">
+          <div class="empty-icon-wrap">${icon('pillBottle', 'empty-icon')}</div>
+          <h2 class="empty-title" data-testid="text-empty-title-schedule">No medicines added yet</h2>
+          <p class="empty-desc" data-testid="text-empty-description-schedule">Add a medicine to see today's schedule here.</p>
+          <button class="btn btn-primary btn-lg" id="btn-add-medicine-schedule" data-testid="button-add-medicine-schedule">${icon('plus')} Add Your First Medicine</button>
+        </div>` : `<div class="space-y-4">${timeline}</div>`}
+      </div>
+      <div class="card card-p6" data-testid="card-email-summary">
+        <div class="flex items-start justify-between mb-4">
+          <div class="flex items-center gap-3">
+            <div style="padding:.5rem;background:hsl(var(--primary)/.1);border-radius:var(--radius-md);">
+              <span class="icon-sm text-primary" style="display:inline-flex">${ICONS.mail}</span>
+            </div>
+            <div>
+              <h3 class="font-semibold text-lg" data-testid="text-title">Daily Email Summary</h3>
+              <p class="text-sm text-muted" data-testid="text-scheduled-time">Scheduled daily at ${formatTime12('09:00')}</p>
+            </div>
+          </div>
+        </div>
+        <div class="space-y-4">
+          <div class="flex items-center gap-2 text-sm">
+            ${icon('clock','icon-sm icon-clock')}<span class="text-muted">Last sent:</span>
+            <span class="badge" data-testid="badge-last-sent">${lastSentLabel}</span>
+          </div>
+          <div class="flex items-center gap-2 text-sm">
+            <span class="text-muted">Medicines included:</span>
+            <span class="badge badge-default" data-testid="badge-medicine-count">${state.medicines.length}</span>
+          </div>
+          <button class="btn btn-outline btn-full mt-2" id="btn-resend-email" data-testid="button-resend" ${state.medicines.length === 0 ? 'disabled' : ''}>${icon('send','icon-sm')} Send Now</button>
+        </div>
+      </div>
+    </main>
+  </div>`;
+}
+
+// ---------- Family ----------
+function renderFamily() {
+  const members = state.familyMembers;
+  return `
+  <div class="page">
+    <header class="app-header">
+      <div class="max-w-4xl px-4 py-4 header-row">
+        <div>
+          <h1 class="title-xl" data-testid="text-family-members-title">Family Members</h1>
+          <p class="subtitle" data-testid="text-family-members-subtitle">Manage notification contacts</p>
+        </div>
+        <div class="header-actions">
+          ${themeToggleHTML('family')}
+          <button class="btn btn-primary" id="btn-add-family-member" data-testid="button-add-family-member">${icon('plus')} Add Member</button>
+        </div>
+      </div>
+    </header>
+    <main class="max-w-4xl px-4 py-6 space-y-4">
+      ${members.map(renderFamilyMemberCard).join('')}
+    </main>
+  </div>`;
+}
+
+function renderFamilyMemberCard(m) {
+  return `
+  <div class="card card-p4" data-testid="card-family-member-${m.id}">
+    <div class="flex items-start justify-between gap-4">
+      <div class="flex-1" style="min-width:0;">
+        <div class="flex items-center gap-2 mb-2">
+          <span class="icon text-primary">${ICONS.user}</span>
+          <h3 class="font-semibold text-lg" data-testid="text-name-${m.id}">${escapeHtml(m.name)}</h3>
+          ${m.relation ? `<span class="badge" data-testid="badge-relation-${m.id}">${escapeHtml(m.relation)}</span>` : ''}
+        </div>
+        <div class="space-y-1">
+          <div class="flex items-center gap-2 text-sm text-muted">${icon('mail','icon-sm')}<span data-testid="text-email-${m.id}">${escapeHtml(m.email)}</span></div>
+          ${m.phone ? `<div class="flex items-center gap-2 text-sm text-muted">${icon('phone','icon-sm')}<span data-testid="text-phone-${m.id}">${escapeHtml(m.phone)}</span></div>` : ''}
+        </div>
+        <div class="flex gap-2 mt-3">
+          ${m.notifyOnMissed ? `<span class="badge badge-outline" data-testid="badge-notify-missed-${m.id}">Notify on Missed</span>` : ''}
+          ${m.notifyOnTaken ? `<span class="badge badge-outline" data-testid="badge-notify-taken-${m.id}">Notify on Taken</span>` : ''}
+        </div>
+      </div>
+      <button class="btn btn-ghost btn-icon sm" data-action="delete-family" data-id="${m.id}" data-testid="button-delete-${m.id}">${icon('trash','icon-sm')}</button>
+    </div>
+  </div>`;
+}
+
+function renderAddFamilyDialog() {
+  return `
+  <div class="overlay" id="add-family-overlay">
+    <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="add-family-dialog-title">
+      <h2 class="dialog-title" id="add-family-dialog-title">Add Family Member</h2>
+      <form id="add-family-form">
+        <div class="field">
+          <label class="label" for="field-fam-name">Name</label>
+          <input class="input" type="text" id="field-fam-name" name="name" placeholder="John Doe" data-testid="input-family-member-name" required>
+        </div>
+        <div class="field">
+          <label class="label" for="field-fam-email">Email</label>
+          <input class="input" type="email" id="field-fam-email" name="email" placeholder="john@example.com" data-testid="input-family-member-email" required>
+        </div>
+        <div class="field">
+          <label class="label" for="field-fam-phone">Phone (Optional)</label>
+          <input class="input" type="tel" id="field-fam-phone" name="phone" placeholder="+1234567890" data-testid="input-family-member-phone">
+        </div>
+        <div class="field">
+          <label class="label" for="field-fam-relation">Relation (Optional)</label>
+          <input class="input" type="text" id="field-fam-relation" name="relation" placeholder="e.g., Spouse, Parent, Caregiver" data-testid="input-family-member-relation">
+        </div>
+        <div class="field switch-row">
+          <div>
+            <label class="label" style="margin-bottom:2px;" id="label-notify-missed">Notify on Missed Medicine</label>
+            <p class="help-text">Send alert when medicine is missed</p>
+          </div>
+          <div class="switch" data-on="true" data-switch="notifyOnMissed" role="switch" aria-checked="true" aria-labelledby="label-notify-missed" tabindex="0" data-testid="switch-notify-missed"><div class="knob"></div></div>
+        </div>
+        <div class="field switch-row">
+          <div>
+            <label class="label" style="margin-bottom:2px;" id="label-notify-taken">Notify on Taken Medicine</label>
+            <p class="help-text">Send confirmation when medicine is taken</p>
+          </div>
+          <div class="switch" data-on="false" data-switch="notifyOnTaken" role="switch" aria-checked="false" aria-labelledby="label-notify-taken" tabindex="0" data-testid="switch-notify-taken"><div class="knob"></div></div>
+        </div>
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary btn-flex1" data-testid="button-submit-family-member">Add Family Member</button>
+          <button type="button" class="btn btn-outline" data-action="cancel-add-family" data-testid="button-cancel-family-member">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>`;
+}
+
+// ---------- Settings ----------
+function renderSettings() {
+  const granted = ('Notification' in window) && Notification.permission === 'granted';
+  return `
+  <div class="page">
+    <header class="app-header">
+      <div class="max-w-4xl px-4 py-4 header-row">
+        <div>
+          <h1 class="title-xl" data-testid="text-settings-title">Settings</h1>
+          <p class="subtitle" data-testid="text-settings-subtitle">Configure your preferences</p>
+        </div>
+        ${themeToggleHTML('settings')}
+      </div>
+    </header>
+    <main class="max-w-4xl px-4 py-6 space-y-6">
+      <div class="card card-p6">
+        <h2 class="font-semibold mb-4 flex items-center gap-2" style="font-size:1.125rem;">${icon('bell','icon-sm')} Notifications</h2>
+        <div class="space-y-4">
+          <div class="switch-row">
+            <div>
+              <label class="label" style="margin-bottom:2px;" for="browser-notifications" id="label-browser-notifications">Browser Notifications</label>
+              <p class="help-text">${granted ? 'Notifications enabled - You will receive medicine reminders' : 'Enable to receive medicine reminders 15 minutes before time'}</p>
+            </div>
+            ${granted
+              ? `<div class="switch" id="browser-notifications" data-on="true" role="switch" aria-checked="true" aria-labelledby="label-browser-notifications" data-testid="switch-browser-notifications"><div class="knob"></div></div>`
+              : `<button class="btn btn-primary" id="btn-enable-notifications" data-testid="button-enable-notifications">Enable</button>`}
+          </div>
+          <div class="switch-row">
+            <div><label class="label" style="margin-bottom:2px;" for="sound-alerts" id="label-sound-alerts">Sound Alerts</label><p class="help-text">Play sound with notifications</p></div>
+            <div class="switch" id="sound-alerts" data-on="true" role="switch" aria-checked="true" aria-labelledby="label-sound-alerts" data-testid="switch-sound-alerts"><div class="knob"></div></div>
+          </div>
+          <button class="btn btn-outline btn-full" id="btn-test-reminder" data-testid="button-test-reminder">${icon('bell','icon-sm')} Test Reminder Now</button>
+          <p class="help-text">Reminders normally fire 15 minutes before a scheduled time — use this to hear/see one right away.</p>
+        </div>
+      </div>
+      <div class="card card-p6">
+        <h2 class="font-semibold mb-4 flex items-center gap-2" style="font-size:1.125rem;">${icon('volume2','icon-sm')} Voice Alerts</h2>
+        <div class="switch-row">
+          <div><label class="label" style="margin-bottom:2px;" for="voice-enabled" id="label-voice-enabled">Enable Voice Alerts</label><p class="help-text">Speak medicine reminders aloud</p></div>
+          <div class="switch" id="voice-enabled" data-on="true" role="switch" aria-checked="true" aria-labelledby="label-voice-enabled" data-testid="switch-voice-enabled"><div class="knob"></div></div>
+        </div>
+      </div>
+      <div class="card card-p6">
+        <h2 class="font-semibold mb-4 flex items-center gap-2" style="font-size:1.125rem;">${icon('mail','icon-sm')} Email Settings</h2>
+        <div class="space-y-4">
+          <div class="switch-row">
+            <div><label class="label" style="margin-bottom:2px;" for="daily-email" id="label-daily-email">Daily Email Summary</label><p class="help-text">Receive daily medicine schedule via email</p></div>
+            <div class="switch" id="daily-email" data-on="true" role="switch" aria-checked="true" aria-labelledby="label-daily-email" data-testid="switch-daily-email"><div class="knob"></div></div>
+          </div>
+          <div>
+            <label class="label" for="email-time">Email Time</label>
+            <input class="input" type="time" id="email-time" value="09:00" data-testid="input-email-time">
+          </div>
+          <div>
+            <label class="label" for="email-address">Email Address</label>
+            <input class="input" type="email" id="email-address" placeholder="your@email.com" value="${escapeHtml(state.familyMembers[0]?.email || '')}" data-testid="input-email-address">
+          </div>
+          <button class="btn btn-outline" id="btn-test-email" data-testid="button-test-email">Send Test Email</button>
+        </div>
+      </div>
+      <div class="card card-p6">
+        <h2 class="font-semibold mb-4 flex items-center gap-2" style="font-size:1.125rem;">${icon('moon','icon-sm')} Appearance</h2>
+        <div class="switch-row">
+          <div><label class="label" style="margin-bottom:2px;">Theme</label><p class="help-text">Toggle light/dark mode using the button above</p></div>
+          ${themeToggleHTML('settings2')}
+        </div>
+      </div>
+    </main>
+  </div>`;
+}
+
+// ---------- Bottom Nav ----------
+function renderBottomNav() {
+  const tabs = [
+    { id: 'home', label: 'Home', i: 'home' },
+    { id: 'add', label: 'Add', i: 'plus' },
+    { id: 'schedule', label: 'Schedule', i: 'calendar' },
+    { id: 'family', label: 'Family', i: 'users' },
+    { id: 'settings', label: 'Settings', i: 'settings' },
+  ];
+  return `
+  <nav class="bottom-nav" data-testid="bottom-nav">
+    <div class="bottom-nav-inner">
+      ${tabs.map(t => `
+        <button class="nav-btn ${state.activeTab === t.id ? 'active' : ''}" data-action="set-tab" data-tab="${t.id}" data-testid="button-tab-${t.id}">
+          ${icon(t.i)}<span>${t.label}</span>
+        </button>`).join('')}
+    </div>
+  </nav>`;
+}
+
+function escapeHtml(str) {
+  if (str === undefined || str === null) return '';
+  return String(str).replace(/[&<>"']/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s]));
+}
+
+function rescheduleReminders() {
+  NotificationManager.cancelAll();
+  state.medicines.forEach(med => {
+    med.times.forEach(time => {
+      NotificationManager.scheduleReminder({
+        id: med.id, medicineName: med.name, dosage: med.dosage, time,
+        enableNotifications: med.enableNotifications ?? true,
+        enableVoiceReminder: med.enableVoiceReminder ?? true,
+      });
+    });
+  });
+}
+
+// ---------- Event handling ----------
+function attachHandlers() {
+  document.querySelectorAll('[id^="theme-toggle-"]').forEach(b => b.addEventListener('click', toggleTheme));
+
+  document.querySelectorAll('[data-action="set-tab"]').forEach(b => b.addEventListener('click', () => {
+    state.activeTab = b.dataset.tab;
+    console.log('Tab changed to:', state.activeTab);
+    render();
+  }));
+
+  const addHeaderBtn = document.getElementById('btn-add-medicine-header');
+  if (addHeaderBtn) addHeaderBtn.addEventListener('click', () => { state.editingMedicineId = null; state.addMedicineTimes = []; state.showAddMedicineDialog = true; render(); });
+  const addFirstBtn = document.getElementById('btn-add-first-medicine');
+  if (addFirstBtn) addFirstBtn.addEventListener('click', () => { state.editingMedicineId = null; state.addMedicineTimes = []; state.showAddMedicineDialog = true; render(); });
+  const addFirstBtnSchedule = document.getElementById('btn-add-medicine-schedule');
+  if (addFirstBtnSchedule) addFirstBtnSchedule.addEventListener('click', () => { state.editingMedicineId = null; state.addMedicineTimes = []; state.showAddMedicineDialog = true; render(); });
+
+  document.querySelectorAll('[data-action="edit-med"]').forEach(b => b.addEventListener('click', () => {
+    const med = state.medicines.find(m => m.id === b.dataset.id);
+    if (!med) return;
+    state.editingMedicineId = med.id;
+    state.addMedicineTimes = [...med.times];
+    state.showAddMedicineDialog = true;
+    console.log('Editing medicine:', med.id);
+    render();
+  }));
+  document.querySelectorAll('[data-action="delete-med"]').forEach(b => b.addEventListener('click', () => {
+    state.medicines = state.medicines.filter(m => m.id !== b.dataset.id);
+    console.log('Medicine deleted:', b.dataset.id);
+    render();
+  }));
+  document.querySelectorAll('[data-action="mark-taken"]').forEach(b => b.addEventListener('click', () => {
+    const med = state.medicines.find(m => m.id === b.dataset.id);
+    if (!med) return;
+    const time = b.dataset.time;
+    const qty = med.quantityPerDose || 1;
+    const wasTaken = !!med.takenTimes[time];
+    if (!wasTaken) {
+      if ((med.stockCount || 0) < qty) {
+        showToast('Not enough stock', `${med.name} doesn't have enough stock left for this dose`, 'destructive');
+        return;
+      }
+      med.stockCount = Math.max(0, (med.stockCount || 0) - qty);
+      med.takenTimes[time] = true;
+    } else {
+      med.stockCount = (med.stockCount || 0) + qty;
+      med.takenTimes[time] = false;
+    }
+    console.log(`Marked ${med.name} at ${time} as ${med.takenTimes[time] ? 'taken' : 'not taken'} — stock now ${med.stockCount}`);
+    render();
+  }));
+
+  const timeInput = document.getElementById('time-input');
+  const addTimeBtn = document.getElementById('btn-add-time');
+  function attachTimeChipRemoveHandlers() {
+    document.querySelectorAll('[data-action="remove-time"]').forEach(b => b.addEventListener('click', () => {
+      state.addMedicineTimes = state.addMedicineTimes.filter(t => t !== b.dataset.time);
+      renderTimeChips();
+    }));
+  }
+  function renderTimeChips() {
+    const chipsEl = document.getElementById('time-chips');
+    if (chipsEl) {
+      chipsEl.innerHTML = state.addMedicineTimes.map(t =>
+        `<span class="badge" data-testid="badge-time-${t}">${formatTime12(t)}<button type="button" class="chip-remove" data-action="remove-time" data-time="${t}" data-testid="button-remove-time-${t}">${icon('x','icon-xs')}</button></span>`
+      ).join('');
+      attachTimeChipRemoveHandlers();
+    }
+  }
+  if (addTimeBtn) addTimeBtn.addEventListener('click', () => {
+    const val = timeInput.value;
+    if (val && !state.addMedicineTimes.includes(val)) {
+      state.addMedicineTimes = [...state.addMedicineTimes, val].sort();
+      renderTimeChips();
+      timeInput.value = '';
+      const errorEl = document.getElementById('times-error');
+      if (errorEl) errorEl.classList.add('hidden');
+    }
+  });
+  attachTimeChipRemoveHandlers();
+
+  const addMedForm = document.getElementById('add-medicine-form');
+  if (addMedForm) addMedForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    try {
+      const errorEl = document.getElementById('times-error');
+      if (state.addMedicineTimes.length === 0) {
+        if (errorEl) errorEl.classList.remove('hidden');
+        return;
+      }
+      const fd = new FormData(addMedForm);
+      const data = {
+        name: fd.get('name'), dosage: fd.get('dosage'), frequency: fd.get('frequency'),
+        notes: fd.get('notes') || undefined,
+        stockCount: Number(fd.get('stockCount')) || 0,
+        lowStockThreshold: Number(fd.get('lowStockThreshold')) || 5,
+        quantityPerDose: Math.max(1, Number(fd.get('quantityPerDose')) || 1),
+      };
+      if (state.editingMedicineId) {
+        const idx = state.medicines.findIndex(m => m.id === state.editingMedicineId);
+        if (idx !== -1) {
+          state.medicines[idx] = {
+            ...state.medicines[idx],
+            name: data.name, dosage: data.dosage, times: state.addMedicineTimes,
+            frequency: data.frequency, stockCount: data.stockCount,
+            lowStockThreshold: data.lowStockThreshold, notes: data.notes,
+            quantityPerDose: data.quantityPerDose,
+          };
+          console.log('Medicine updated:', state.medicines[idx]);
+        }
+        state.editingMedicineId = null;
+      } else {
+        const newMedicine = {
+          id: Date.now().toString(), name: data.name, dosage: data.dosage,
+          times: state.addMedicineTimes, frequency: data.frequency,
+          stockCount: data.stockCount, lowStockThreshold: data.lowStockThreshold,
+          quantityPerDose: data.quantityPerDose,
+          enableNotifications: true, enableVoiceReminder: true,
+          notes: data.notes, takenTimes: {},
+        };
+        state.medicines = [...state.medicines, newMedicine];
+        if (newMedicine.stockCount <= newMedicine.lowStockThreshold) console.log('Low stock alert for:', newMedicine.name);
+        console.log('Medicine added:', newMedicine);
+      }
+      state.showAddMedicineDialog = false;
+      state.activeTab = addMedForm.dataset.inDialog === 'true' ? state.activeTab : 'home';
+      render();
+    } catch (err) {
+      console.error('Failed to save medicine:', err);
+      showToast('Something went wrong saving this medicine', String(err && err.message || err), 'destructive');
+    }
+  });
+  document.querySelectorAll('[data-action="cancel-add-medicine"]').forEach(b => b.addEventListener('click', () => {
+    state.showAddMedicineDialog = false;
+    state.editingMedicineId = null;
+    if (state.activeTab === 'add') state.activeTab = 'home';
+    render();
+  }));
+  const overlay1 = document.getElementById('add-medicine-overlay');
+  if (overlay1) overlay1.addEventListener('click', (e) => { if (e.target === overlay1) { state.showAddMedicineDialog = false; state.editingMedicineId = null; render(); } });
+
+  // Family
+  const addFamilyBtn = document.getElementById('btn-add-family-member');
+  if (addFamilyBtn) addFamilyBtn.addEventListener('click', () => { state.showAddFamilyDialog = true; render(); });
+  document.querySelectorAll('[data-action="delete-family"]').forEach(b => b.addEventListener('click', () => {
+    state.familyMembers = state.familyMembers.filter(m => m.id !== b.dataset.id);
+    console.log('Family member deleted:', b.dataset.id);
+    render();
+  }));
+  document.querySelectorAll('[data-switch]').forEach(sw => {
+    const toggle = () => {
+      sw.dataset.on = sw.dataset.on === 'true' ? 'false' : 'true';
+      sw.setAttribute('aria-checked', sw.dataset.on);
+    };
+    sw.addEventListener('click', toggle);
+    sw.addEventListener('keydown', (e) => {
+      if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); toggle(); }
+    });
+  });
+  const addFamilyForm = document.getElementById('add-family-form');
+  if (addFamilyForm) addFamilyForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const fd = new FormData(addFamilyForm);
+    const notifyMissedSwitch = addFamilyForm.querySelector('[data-switch="notifyOnMissed"]');
+    const notifyTakenSwitch = addFamilyForm.querySelector('[data-switch="notifyOnTaken"]');
+    const newMember = {
+      id: Date.now().toString(),
+      name: fd.get('name'), email: fd.get('email'),
+      phone: fd.get('phone') || '', relation: fd.get('relation') || '',
+      notifyOnMissed: notifyMissedSwitch.dataset.on === 'true',
+      notifyOnTaken: notifyTakenSwitch.dataset.on === 'true',
+    };
+    state.familyMembers = [...state.familyMembers, newMember];
+    state.showAddFamilyDialog = false;
+    console.log('Family member added:', newMember);
+    render();
+  });
+  document.querySelectorAll('[data-action="cancel-add-family"]').forEach(b => b.addEventListener('click', () => { state.showAddFamilyDialog = false; render(); }));
+  const overlay2 = document.getElementById('add-family-overlay');
+  if (overlay2) overlay2.addEventListener('click', (e) => { if (e.target === overlay2) { state.showAddFamilyDialog = false; render(); } });
+
+  // Schedule
+  const resendBtn = document.getElementById('btn-resend-email');
+  if (resendBtn) resendBtn.addEventListener('click', () => {
+    if (state.medicines.length === 0) return;
+    console.log('Resending email summary');
+    const to = state.familyMembers[0]?.email || '';
+    const { subject, body } = generateDailySummaryEmail();
+    EmailManager.sendEmail({ to, subject, body });
+    state.lastEmailSentAt = Date.now();
+    showToast('Email summary resent', to ? `Opening mail app to ${to}` : 'Add a family member email first');
+    render();
+  });
+
+  // Settings
+  const enableNotifBtn = document.getElementById('btn-enable-notifications');
+  if (enableNotifBtn) enableNotifBtn.addEventListener('click', async () => {
+    const granted = await NotificationManager.requestPermission();
+    if (granted) showToast('Notifications Enabled', 'You will now receive medicine reminders');
+    else showToast('Permission Denied', 'Please enable notifications in your browser settings', 'destructive');
+    render();
+  });
+  const testReminderBtn = document.getElementById('btn-test-reminder');
+  if (testReminderBtn) testReminderBtn.addEventListener('click', () => {
+    const sample = state.medicines[0] || { name: 'Aspirin', dosage: '100mg - 1 tablet' };
+    const reminder = { id: 'test', medicineName: sample.name, dosage: sample.dosage, time: new Date().toTimeString().slice(0,5) };
+    NotificationManager.showNotification(reminder);
+    NotificationManager.speakReminder(reminder);
+    showToast('Test reminder sent', 'Sound, notification, and voice alert triggered');
+  });
+  const testEmailBtn = document.getElementById('btn-test-email');
+  if (testEmailBtn) testEmailBtn.addEventListener('click', () => {
+    const to = document.querySelector('[data-testid="input-email-address"]')?.value || '';
+    const dateStr = new Date().toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+    const body = `🔔 MediRemind — Test Email Notification\r\nDate: ${dateStr}\r\n\r\nThis is a test email sent from your MediRemind app to verify your email configuration.\r\n\r\nSystem Status:\r\n- Email Notifications: Active\r\n- Total Medicines Configured: ${state.medicines.length}\r\n- Family Contacts Configured: ${state.familyMembers.length}\r\n\r\nEverything is set up correctly! You will receive structured daily summaries for your medicine schedule.\r\n\r\n--------------------------------------------------\r\nMediRemind — Your Medicine Companion`;
+    EmailManager.sendEmail({ to, subject: 'MediRemind - Test Email Notification', body });
+    showToast('Test email queued', to ? `Opening mail app to ${to}` : 'Enter an email address first');
+  });
+}
+
+document.addEventListener('keydown', (e) => {
+  if (e.key !== 'Escape') return;
+  if (state.showAddMedicineDialog) { state.showAddMedicineDialog = false; state.editingMedicineId = null; render(); }
+  else if (state.showAddFamilyDialog) { state.showAddFamilyDialog = false; render(); }
+});
+
+// ---------- Init ----------
+initTheme();
+loadAppData();
+checkDailyReset();
+NotificationManager.init();
+NotificationManager.requestPermission().then(granted => console.log('Notification permission:', granted ? 'granted' : 'denied'));
+render();
+
+setInterval(() => {
+  const before = state.lastUsageDate;
+  checkDailyReset();
+  if (state.lastUsageDate !== before) render();
+}, 60000);
+</script>
+</body>
+</html>
